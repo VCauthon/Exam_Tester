@@ -1,4 +1,6 @@
 import pytest
+from sys import path
+path.append("../exam_tester")
 import exam_tester.show_data
 
 '''

@@ -1,5 +1,7 @@
-import pytest
+from sys import path
+path.append("../exam_tester")
 import exam_tester.io
+import pytest
 
 '''
     Verifies all the subclasses inside io.py
