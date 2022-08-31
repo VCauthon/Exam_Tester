@@ -52,6 +52,8 @@ import exam_tester.io
 
     # Appending new data to the file where all the history is saved
 
+    # Appending new data to the file indicating that there are not missed questions
+
 # Test save_questions
 
     # Trying to save a question that already exist by question and module
