@@ -1,8 +1,14 @@
+# Settings to import the data from the software
 from sys import path
 path.append("../exam_tester")
-
 from exam_tester import io
-from exam_tester.entity import question
+from exam_tester.entities import question
+
+# Import to use DataFrame
+import pandas as pd
+
+# Import the module to search path
+import os
 
 class import_questions(io):
     '''
@@ -21,5 +27,16 @@ class import_questions(io):
                 3.Convert the results in questions.py
     '''
 
-    def read_data(self) -> question:
+    def read_data(self) -> list(question):
+        '''
+        Method to convert CSV to question
+        '''
+
+        # Search if all the received path exists
+        for file in super().courses.keys():
+            if not os.path.exists(super().courses[file]):
+                raise Exception("The process asked to import a file that doesn't exists")
+
+
+
         pass
