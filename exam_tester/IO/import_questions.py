@@ -4,9 +4,6 @@ path.append("../exam_tester")
 from exam_tester import io
 from exam_tester.entities import question
 
-# Import to use DataFrame
-import pandas as pd
-
 # Import the module to search path
 import os
 
