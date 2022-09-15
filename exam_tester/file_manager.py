@@ -24,12 +24,15 @@ class file_manager:
 
             # Adds the course inside the returned dictionary
             course_iterated = os.path.join(root_path_courses, course)
-            existing_courses[course_iterated] = []
+            existing_courses[course] = {
+                "path":course_iterated,
+                "files": []
+            }
 
             for module in filter(lambda file: file_manager.check_extension_file(path_file=file, extension=".csv"), os.listdir(course_iterated)):
                 
                 # Appends inside the course entry the module
-                existing_courses[course_iterated].append(os.path.join(course_iterated, module))
+                existing_courses[course]["files"].append(os.path.join(course_iterated, module))
 
         return existing_courses
 
