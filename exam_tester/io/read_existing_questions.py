@@ -7,7 +7,7 @@ from exam_tester.entities import question
 # Import the module to search path
 import os
 
-class import_questions(io):
+class read_existing_questions(io):
     '''
         1. Import new questions saved in the main dir
         2. Import all the saved questions and turn it into question objects
