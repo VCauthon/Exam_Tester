@@ -24,6 +24,8 @@ class import_questions(io):
                 3.Convert the results in questions.py
     '''
 
+
+    #TODO You have to take in a account that in some questions there are fake break line (/n)
     def read_data(self) -> list(question):
         '''
         Method to convert CSV to question
