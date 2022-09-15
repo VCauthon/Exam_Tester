@@ -50,11 +50,16 @@ class file_manager:
 
                 open(file=path_file, mode="w")
 
+            else:
+                raise Exception("The already exist")
+
         except:
             file_manager.error = f"An error creating the file '{path_file}' has ocurred"
 
         else:
             result_execution = True
+
+        return result_execution
         
 
     def check_file_exist(path_file: str) -> bool:
