@@ -190,21 +190,24 @@ class questions_loader(data_validator):
         super().data_imported["imported_questions"]["Valid"] = 1
 
         # Checks if the expected fields are informed
+        # FIXME: The loc method doesn't know's if the column has data or not
+        """
         for column in self.headers_expected_load_question:
             super().data_imported["imported_questions"].loc[
-                super().data_imported["imported_questions"][column] == pd.isna, "Valid"] = 0
+                super().data_imported["imported_questions"][column] == pd.isnull, "Valid"] = 0
+        """
 
         # TODO: Improve the system to knows if the module is valid by m1 to module1 and not forcing that the module informet is the same as the filename
         # Checks if there are questions from non valid modules by looking all the 
+        # FIXME: It doesn't return the modules that only exists inside the imported questions
         non_existing_modules = list(
-            set(super().data_imported["imported_questions"]["Module"].unique()) - super().EXISTING_COURSES[
-                super().working_course])
+            set(super().data_imported["imported_questions"]["Module"].unique()) - set(super().EXISTING_COURSES[
+                self.working_course]))
 
         # All the questions with non existing modules are marked as invalid
         for non_valid_module in non_existing_modules:
             super().data_imported["imported_questions"].loc[
                 super().data_imported["imported_questions"]["Module"] == non_valid_module, "Valid"] = 0
-        # BUG: If you get an error from the loc method of the function change the operator == to =
 
         # TODO: Pending to implement the logic to discard all the invalid questions
         """
