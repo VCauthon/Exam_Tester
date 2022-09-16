@@ -33,12 +33,12 @@ class questions_loader(data_validator):
 
                     # Checks if the file has the new questions to load
                     if file == "load_questions":
-                        super().df_questions_to_import = data_exported
+                        super().data_imported["imported_questions"] = data_exported
 
                     # Checks if the file has the modules and is not the history
                     elif file.lower().startswith("m"):
-                        super().df_questions_from_course = self.__load_questions_to_class_variable(data_to_load= data_exported, \
-                                variable_used=super().df_questions_from_course)
+                        super().data_imported["existing_questions"] = self.__load_questions_to_class_variable(data_to_load= data_exported, \
+                                variable_used=super().data_imported["existing_questions"])
         
         # If anything ocurred saves the error detected
         except Exception as error:
