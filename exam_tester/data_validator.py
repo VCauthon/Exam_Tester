@@ -7,11 +7,9 @@ class data_validator(ABC):
     """
     Class to validate all the imported and exported before working with it
     """
-
-    imported_questions = 0
     df_logs_from_course = None
     df_questions_from_course = None
-    df_questions_to_import = None
+    df_questions_to_import = None # TODO: The imported_questions = 0 variable can be calculate by the own DataFrame (NEW COLUMN)
 
     def __init__(self, course:str) -> None:
         # Makes the io accessible to the rest of the subclass
