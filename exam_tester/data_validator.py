@@ -1,9 +1,8 @@
 from abc import ABC, abstractclassmethod
-from sys import path
-
-path.append("../exam_tester")
-from exam_tester.io import io
 import pandas as pd
+from sys import path
+path.append("../exam_tester")
+from exam_tester.io import io # noqa E402
 
 
 class data_validator(ABC):
@@ -14,7 +13,7 @@ class data_validator(ABC):
     data_imported = {
         "logs_course": None,
         "imported_questions": None,
-        # TODO: The imported_questions = 0 variable can be calculate by the own DataFrame (NEW COLUMN)
+        # TODO: The imported_questions = 0 variable can be calculate by the own DataFrame (NEW COLUMN) # noqa
         "existing_questions": None
     }
 
@@ -42,14 +41,18 @@ class questions_loader(data_validator):
     def __init__(self, course: str) -> None:
         super().__init__(course)
 
-        # Variable to set the expected headers for the load_questions and modules
-        self.headers_expected_load_question = ["Module", "Question", "C_Answer", "W_Answer", "Source", "Detail_answer"]
-        self.headers_expected_load_module = ["ID", "Module", "Question", "C_Answer", "W_Answer", "Source",
+        # Variable to set the expected headers for load_questions
+        self.headers_expected_load_question = ["Module", "Question",
+                                               "C_Answer", "W_Answer",
+                                               "Source", "Detail_answer"]
+        self.headers_expected_load_module = ["ID", "Module",
+                                             "Question", "C_Answer",
+                                             "W_Answer", "Source",
                                              "Detail_answer"]
 
     def initial_execution(self) -> bool:
         """
-        Initial execution to load all the imported and existing questions 
+        Initial execution to load all the imported and existing questions
         """
 
         # Handle if any error raises
@@ -59,11 +62,15 @@ class questions_loader(data_validator):
             # Iterate all the dictionary following the key of the course
             for file in super().EXISTING_COURSES[self.working_course]["files"]:
 
-                file_iterated_path = super().EXISTING_COURSES[self.working_course]["files"][file]
+                file_iterated_path = super().EXISTING_COURSES[
+                    self.working_course]["files"][file]
 
                 # Checks if the file has a valid extension
-                if io.validate_file_extension(path=file_iterated_path, ext=".csv") and (
-                        file == "load_questions" or file.lower().startswith("m")):
+                if io.validate_file_extension(
+                                              path=file_iterated_path,
+                                              ext=".csv") and (
+                                                file == "load_questions" or
+                                                file.lower().startswith("m")):
 
                     data_exported = pd.read_csv(file_iterated_path, sep=";")
 
@@ -81,7 +88,7 @@ class questions_loader(data_validator):
             if super().data_imported["imported_questions"] is not None and len(
                     super().data_imported["imported_questions"]) > 0:
 
-                # Checks if there are any differences between the headers of the imported CSV vs the expected headers
+                # Checks if all the headers are in the imported file
                 if len(list(set(super().data_imported["imported_questions"].columns) -
                             set(self.headers_expected_load_module))) > 0:
 
@@ -104,7 +111,6 @@ class questions_loader(data_validator):
                     raise Exception(
                         f"The file with the imported questions doesn't have the expected headers \n Has: {showed_data} "
                         f"\n Expected: {self.headers_expected_load_question}")
-
 
         # If anything ocurred saves the error detected
         except Exception as error:
@@ -183,7 +189,6 @@ class questions_loader(data_validator):
             1. Checks if all the expected fields are informed
             2. Checks if the imported has a CSV to get saved
             3. Checks if the question imported already exist in the internal CSV
-            
         """
 
         # Fields to know if there are any valid questions
@@ -198,7 +203,7 @@ class questions_loader(data_validator):
         """
 
         # TODO: Improve the system to knows if the module is valid by m1 to module1 and not forcing that the module informet is the same as the filename
-        # Checks if there are questions from non valid modules by looking all the 
+        # Checks if there are questions from non valid modules by looking all the
         # FIXME: It doesn't return the modules that only exists inside the imported questions
         non_existing_modules = list(
             set(super().data_imported["imported_questions"]["Module"].unique()) - set(super().EXISTING_COURSES[
@@ -212,8 +217,7 @@ class questions_loader(data_validator):
         # TODO: Pending to implement the logic to discard all the invalid questions
         """
         # Checks if there are questions duplicated inside the register
-        for index, register in super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Valid"] == 1].iterrow():
-            
+        for index, register in super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Valid"] == 1].iterrow(): # noqa
             # Checks if the iterated questions imported exists inside the inner csv with all the questions
             super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Question"] == register["Question"], "Valid"] = 0
         """
@@ -267,7 +271,7 @@ class logs_loader(data_validator):
 
     def initial_execution(self) -> bool:
         """
-        Initial execution to load all the imported and existing questions 
+        Initial execution to load all the imported and existing questions
         """
 
         # Handle if any error raises
@@ -295,7 +299,7 @@ class logs_loader(data_validator):
         finally:
             return result_execution
 
-    # TODO: Pending create the new variable 
+    # TODO: Pending create the new variable
     def __append_data_into_df(self, data_new, data_load) -> bool:
         """
         Method to load new data to the final variable

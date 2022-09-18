@@ -66,7 +66,7 @@ class io:
         pass
 
 
-    def append_df_into_csv(path:str) -> bool:
+    def append_df_into_csv(path:str, df:pd) -> bool:
         """
         Append new data into to the existing CSV
         """
