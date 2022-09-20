@@ -10,7 +10,7 @@ class io:
     # Class variable to check if anything ocurred
     error = "None errors detected in the process"
 
-    def list_courses() -> dict:
+    def list_courses(self) -> dict:
         """
         List all the files for every course
         """
@@ -27,15 +27,15 @@ class io:
                 "files": {}
             }
 
-            for module in filter(lambda file: io.validate_file_extension(path=file, ext=".csv"), os.listdir(course_iterated)):
+            for module in filter(lambda file: io.validate_file_extension(path=file, ext=".csv"),
+                                 os.listdir(course_iterated)):
             
                 # Appends inside the course entry the module
                 existing_courses[course]["files"][os.path.splitext(module)[0]] = os.path.join(course_iterated, module)
 
         return existing_courses
 
-
-    def import_csv_to_df(path:str) -> pd:
+    def import_csv_to_df(self, path: str) -> pd:
         """
         Import the received CSV into a DataFrame
         """
@@ -45,7 +45,7 @@ class io:
         try:
 
             # Checks if the file does exist and creates the imports it
-            if io.check_file_exist(path):
+            if self.validate_file_exist(path=path):
                 data_imported = pd.read_csv(path, sep=";")
             
             else:
@@ -53,27 +53,25 @@ class io:
         
         # If anything ocurred saves the error detected
         except Exception as error:
-            io.error = f"There has been an error importing the file {path} because of the following error.\nError:{error}"
+            io.error = f"There has been an error importing the file {path} because of the following error." \
+                       f"\nError:{error}"
         
         finally:
             return data_imported
 
-
-    def export_df_to_csv(path:str) -> bool:
+    def export_df_to_csv(self, path: str) -> bool:
         """
         Export the received DataFrame into a CSV
         """
         pass
 
-
-    def append_df_into_csv(path:str, df:pd) -> bool:
+    def append_df_into_csv(self, path: str, df: pd) -> bool:
         """
         Append new data into to the existing CSV
         """
         pass
 
-
-    def create_csv(path:str) -> bool:
+    def create_csv(self, path: str) -> bool:
         """
         Create a new empty file
         """
@@ -83,7 +81,7 @@ class io:
         try:
 
             # Checks if the file doesn't exist and creates the file
-            if not io.check_file_exist(path):
+            if not self.validate_file_exist(path=path):
                 open(file=path, mode="w")
             
             # Detects if the file already exist
@@ -92,7 +90,7 @@ class io:
         
         # If anything ocurred saves the error detected
         except:
-            io.error = f"An error creating the file '{path}' has ocurred"
+            io.error = f"An error creating the file '{path}' has occurred"
 
         # Checks if the process ended correctly
         else:
@@ -101,15 +99,13 @@ class io:
         finally:
             return result_execution
 
-
-    def validate_file_exist(path:str) -> bool:
+    def validate_file_exist(self, path: str) -> bool:
         """
         Checks if the path exist
         """
         return os.path.exists(path)
 
-
-    def validate_file_extension(path:str, ext:str) -> bool:
+    def validate_file_extension(self, path: str, ext: str) -> bool:
         """
         Checks if the path has an specific extension
         """
