@@ -1,3 +1,4 @@
+import abc
 from abc import ABC, abstractclassmethod
 import pandas as pd
 from sys import path
@@ -11,18 +12,19 @@ class data_validator(ABC):
     """
     # Dictionary with all the DataFrames imported
     data_imported = {
-        "logs_course": None,
-        "imported_questions": None,
+        "logs_course": pd.DataFrame,
+        "imported_questions": pd.DataFrame,
         # TODO: The imported_questions = 0 variable can be calculate by the own DataFrame (NEW COLUMN) # noqa
-        "existing_questions": None
+        "existing_questions": pd.DataFrame
     }
 
+    # TODO: Resolve how to invoke IO without using self parameter
     # Initial list of all the files inside the project
     EXISTING_COURSES = io.list_courses()
 
     def __init__(self, course: str) -> None:
         # Makes the io accessible to the rest of the subclass
-        self.io_obj = io
+        self.io_obj = io()
 
         # Variables used during all executions
         self.working_course = course
@@ -30,7 +32,7 @@ class data_validator(ABC):
         # Control variable
         self.error = "None errors detected in the process"
 
-    @abstractclassmethod
+    @abc.abstractmethod
     def initial_execution(self) -> bool:
         pass
 
@@ -66,7 +68,7 @@ class questions_loader(data_validator):
                     self.working_course]["files"][file]
 
                 # Checks if the file has a valid extension
-                if io.validate_file_extension(
+                if self.io_obj.validate_file_extension(
                                               path=file_iterated_path,
                                               ext=".csv") and (
                                                 file == "load_questions" or
@@ -114,7 +116,8 @@ class questions_loader(data_validator):
 
         # If anything ocurred saves the error detected
         except Exception as error:
-            self.error = f"There has been an error importing the file from {path} because of the following error.\nError:{error} \n IOError:{io.error}"
+            self.error = f"There has been an error importing the file from {path} because of the following error." \
+                         f"\nError:{error} \n IOError:{self.io_obj.error}"
 
         else:
             result_execution = True
@@ -151,7 +154,7 @@ class questions_loader(data_validator):
                         [question_imported[header] for header in super().data_imported["imported_questions"].columns])
 
                     # Drop the imported question from the datatable with all the questions imported
-                    super().data_imported["imported_questions"].drop(index)
+                    super().data_imported["imported_questions"].drop(index=index)
 
                     # Checks if there are any valid question to be imported
 
@@ -159,16 +162,17 @@ class questions_loader(data_validator):
                     imported_questions = pd.DataFrame(columns=valid_questions[0], data=valid_questions[1:])
 
                     # Adds to the correct CSV all the questions
-                    if not self.__load_valid_questions_into_df(df=imported_questions):
+                    if not self.__load_valid_questions_into_df(df_with_valid_questions=imported_questions):
                         raise Exception("Error detected loading the valid data to the CSV")
 
                     # Updates the CSV with the non valid questions (wrong_loaded_questions.csv)
-                    if not self.__load_invalid_questions_into_df(df=imported_questions):
+                    if not self.__load_invalid_questions_into_df(df_with_non_valid_imported_questions=
+                                                                 imported_questions):
                         raise Exception("Error detected updating the invalid questions into wrong_loaded_questions.csv")
 
                     # Merge the existing DataFrame with all the existing questions with the valid ones
-                    super().data_imported["existing_questions"] = pd.concat(super().data_imported["existing_questions"],
-                                                                            imported_questions)
+                    super().data_imported["existing_questions"] = pd.concat(super().data_imported["existing_questions"]
+                                                                            , imported_questions)
 
         except Exception as Error:
             self.error = f"There has been an error loading the new questions into the Exam Tester.\nError:{Error}"
@@ -237,7 +241,7 @@ class questions_loader(data_validator):
         Has to search for every question the correct CSV where it has to save all the data
         """
 
-        io.validate_file_extension(path="", df=df_with_valid_questions)
+        self.io_obj.validate_file_exist(path="")
 
     def __load_invalid_questions_into_df(self, df_with_non_valid_imported_questions: pd) -> bool:
         """
@@ -291,7 +295,8 @@ class logs_loader(data_validator):
 
         # If anything ocurred saves the error detected
         except Exception as error:
-            self.error = f"There has been an error importing the file from {path} because of the following error.\nError:{error} \n IOError:{io.error}"
+            self.error = f"There has been an error importing the file from {path} because of the following error." \
+                         f"\nError:{error} \n IOError:{self.io_obj.error}"
 
         else:
             result_execution = True

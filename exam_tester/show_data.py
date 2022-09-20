@@ -1,3 +1,4 @@
+import abc
 from abc import ABC, abstractclassmethod
 
 # Internal modules of the program
@@ -17,21 +18,21 @@ class show_data(ABC):
         self.questions_pandas = None
 
     # TODO: Pending to create a main function of the class
-    def modes() -> dict:
+    def modes(self) -> dict:
         """
             Method to show all the existing process of the exam tester
         """
         pass
 
     # TODO: Pending to create a main function of the class
-    def convert_df_to_question() -> list(question):
+    def convert_df_to_question(self) -> list[question]:
         """
             Method to convert the received pandas into a list of questions
         """
         pass
 
-    @abstractclassmethod
-    def execute() -> bool:
+    @abc.abstractmethod
+    def execute(self) -> bool:
         """
             Abstract method to run the instanced process asked by the user
         """
