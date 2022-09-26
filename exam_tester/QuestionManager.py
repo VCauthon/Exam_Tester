@@ -143,7 +143,8 @@ class QuestionLoader(QuestionManager):
 
             if self.__check_valid_imported_questions_exist() and self.__check_valid_imported_questions_exist():
 
-                valid_questions_imported = self.__return_imported_questions_by_validity(1)
+                valid_questions_imported = self.__adds_id_column_to_df_imported_questions(
+                    self.__return_imported_questions_by_validity(1))
 
                 # Adds to the correct CSV all the questions
                 if not self.__load_valid_questions_into_df(
@@ -156,7 +157,7 @@ class QuestionLoader(QuestionManager):
                     raise Exception("Error detected updating the invalid questions into wrong_loaded_questions.csv")
 
                 # Merge the existing DataFrame with all the existing questions with the valid ones
-                self.existing_questions = pd.\
+                self.existing_questions = pd. \
                     concat([self.existing_questions, valid_questions_imported])
 
         except Exception as Error:
@@ -171,6 +172,20 @@ class QuestionLoader(QuestionManager):
         # List where all the valid imported questions are going to get listed
         valid_questions = [[cab for cab in self.imported_questions.columns]]
         return self.imported_questions.loc[self.imported_questions["Valid"] == validity][valid_questions]
+
+    def __adds_id_column_to_df_imported_questions(self, data_frame_in: pd.DataFrame) -> pd.DataFrame:
+        """
+        Method to add to the received list a column with all the ID
+        """
+
+        # Adds to the DF the column where all ID are going to get listed
+        data_frame_in.insert(loc=0, column="ID", value="")
+
+        # Calculate and adds the new values
+        last_id_inner_questions = len(self.imported_questions)
+        data_frame_in["ID"] = [i for i in range(last_id_inner_questions + 1, (last_id_inner_questions*2) + 1)]
+
+        return data_frame_in
 
 
     def valid_questions_from_imported_file(self) -> bool:
@@ -228,12 +243,6 @@ class QuestionLoader(QuestionManager):
         return self.valid_questions_from_imported_file()
 
     # endregion
-
-    def __generate_code_for_question(self, module: str, questions_inserted: int) -> str:
-        """
-        Method to calculate the ID used for the question. The ID is calculated by the max question and the module
-        """
-        pass
 
     def __load_valid_questions_into_df(self, df_with_valid_questions: pd) -> bool:
         """
