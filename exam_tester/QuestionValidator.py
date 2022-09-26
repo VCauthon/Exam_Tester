@@ -6,7 +6,7 @@ path.append("../exam_tester")
 from exam_tester.io import io # noqa E402
 
 
-class QuestionValidator(ABC):
+class QuestionManager(ABC):
     """
     Class to validate all the imported and exported before working with it
     """
@@ -38,7 +38,7 @@ class QuestionValidator(ABC):
 
 
 # TODO: Look how to move all the class to other object
-class questions_loader(QuestionValidator):
+class QuestionLoader(QuestionManager):
 
     def __init__(self, course: str) -> None:
         super().__init__(course)
@@ -267,7 +267,7 @@ class questions_loader(QuestionValidator):
 
 
 # TODO: Move the module to the other directory
-class logs_loader(QuestionValidator):
+class QuestionLogger(QuestionManager):
 
     def __init__(self, course: str) -> None:
         super().__init__(course)
