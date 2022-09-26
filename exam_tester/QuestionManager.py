@@ -187,7 +187,6 @@ class QuestionLoader(QuestionManager):
 
         return data_frame_in
 
-
     def valid_questions_from_imported_file(self) -> bool:
         return len(self.imported_questions.loc[self.imported_questions["Valid"] == 1]) > 0
 
