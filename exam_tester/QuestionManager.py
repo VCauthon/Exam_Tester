@@ -190,6 +190,8 @@ class QuestionLoader(QuestionManager):
             # Returns as a count the imported questions
             return len(valid_questions) - 1
 
+    # region Validations done before importing any new question to the inner csv files
+
     def __check_valid_imported_questions_exist(self) -> bool:
         """
         Method to validate if the new imported questions are valid to enter into the internal CSV
@@ -248,6 +250,8 @@ class QuestionLoader(QuestionManager):
             super().imported_questions.loc[super().imported_questions["Module"] == non_valid_module, "Valid"] = 0
 
         return len(super().imported_questions.loc[super().imported_questions["Valid"] == 1]) > 0
+
+    # endregion
 
     def __generate_code_for_question(self, module: str, questions_inserted: int) -> str:
         """
