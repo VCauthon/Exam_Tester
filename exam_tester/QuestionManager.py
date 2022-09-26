@@ -202,34 +202,12 @@ class QuestionLoader(QuestionManager):
         """
 
         # Adds a column to mark the valid questions (all starts as valid)
-        super().data_imported["imported_questions"]["Valid"] = 1
+        self.imported_questions["Valid"] = 1
 
         if self.__mark_imported_questions_with_invalid_module():
-            pass
+            self.__mark_imported_questions_duplicated()
 
-        # TODO: Improve the system to knows if the module is valid by m1 to module1 and not forcing that the module informet is the same as the filename
-        # Checks if there are questions from non valid modules by looking all the
-        # FIXME: It doesn't return the modules that only exists inside the imported questions
-        non_existing_modules = list(
-            set(super().data_imported["imported_questions"]["Module"].unique()) - set(super().EXISTING_COURSES[
-                self.working_course]))
-
-        # All the questions with non existing modules are marked as invalid
-        for non_valid_module in non_existing_modules:
-            super().data_imported["imported_questions"].loc[
-                super().data_imported["imported_questions"]["Module"] == non_valid_module, "Valid"] = 0
-
-        # TODO: Pending to implement the logic to discard all the invalid questions
-        """
-        # Checks if there are questions duplicated inside the register
-        for index, register in super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Valid"] == 1].iterrow(): # noqa
-            # Checks if the iterated questions imported exists inside the inner csv with all the questions
-            super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Question"] == register["Question"], "Valid"] = 0
-        """
-
-        # Returns if there are any valid question
-        return True if len(super().data_imported["imported_questions"].loc[
-                               super().data_imported["imported_questions"]["Valid"] == 1]) > 0 else False
+        return True
 
     def __mark_imported_questions_with_invalid_module(self) -> bool:
         """
@@ -250,6 +228,17 @@ class QuestionLoader(QuestionManager):
             super().imported_questions.loc[super().imported_questions["Module"] == non_valid_module, "Valid"] = 0
 
         return len(super().imported_questions.loc[super().imported_questions["Valid"] == 1]) > 0
+
+    def __mark_imported_questions_duplicated(self) -> bool:
+
+        """
+                # Checks if there are questions duplicated inside the register
+                for index, register in super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Valid"] == 1].iterrow(): # noqa
+                    # Checks if the iterated questions imported exists inside the inner csv with all the questions
+                    super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Question"] == register["Question"], "Valid"] = 0
+                """
+
+        return True
 
     # endregion
 
