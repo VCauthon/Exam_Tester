@@ -132,62 +132,46 @@ class QuestionLoader(QuestionManager):
         finally:
             return result_execution
 
-    # TODO: Add to the MAIN a validation to execute this method if import questions has <1
     def load_valid_imported_questions_to_system(self) -> int:
         """
         Method to import the valid questions into the internal CSV
         """
 
-        result_execution = False
-        valid_questions = None
+        valid_questions_imported = pd.DataFrame
 
         try:
 
-            # List where all the valid imported questions are going to get listed
-            valid_questions = [[cab for cab in self.imported_questions.columns]]
-
             if self.__check_valid_imported_questions_exist() and self.__check_valid_imported_questions_exist():
 
-                # Iterates all the valid imported questions
-                for index, question_imported in self.imported_questions.loc[self.imported_questions["Valid"] == 1]\
-                        .iterrows():
+                valid_questions_imported = self.__return_imported_questions_by_validity(1)
 
-                    # Adds to the list of valid questions the iterated question
-                    data_question = [
-                        self.__generate_code_for_question(question_imported["Module"], len(valid_questions) - 1),
-                        [question_imported[header] for header in super().imported_questions.columns]]
+                # Adds to the correct CSV all the questions
+                if not self.__load_valid_questions_into_df(
+                        df_with_valid_questions=valid_questions_imported):
+                    raise Exception("Error detected loading the valid data to the CSV")
 
-                    # Drop the imported question from the datatable with all the questions imported
-                    super().data_imported["imported_questions"].drop(index=index)
+                # Updates the CSV with the non valid questions (wrong_loaded_questions.csv)
+                if not self.__load_invalid_questions_into_df(df_with_non_valid_imported_questions=
+                                                             self.__return_imported_questions_by_validity(0)):
+                    raise Exception("Error detected updating the invalid questions into wrong_loaded_questions.csv")
 
-                    # Checks if there are any valid question to be imported
-
-                    # Converts the list of values imported into a DataFrame
-                    imported_questions = pd.DataFrame(columns=valid_questions[0], data=valid_questions[1:])
-
-                    # Adds to the correct CSV all the questions
-                    if not self.__load_valid_questions_into_df(df_with_valid_questions=imported_questions):
-                        raise Exception("Error detected loading the valid data to the CSV")
-
-                    # Updates the CSV with the non valid questions (wrong_loaded_questions.csv)
-                    if not self.__load_invalid_questions_into_df(df_with_non_valid_imported_questions=
-                                                                 imported_questions):
-                        raise Exception("Error detected updating the invalid questions into wrong_loaded_questions.csv")
-
-                    # Merge the existing DataFrame with all the existing questions with the valid ones
-                    super().data_imported["existing_questions"] = pd.concat(super().data_imported["existing_questions"]
-                                                                            , imported_questions)
+                # Merge the existing DataFrame with all the existing questions with the valid ones
+                self.existing_questions = pd.\
+                    concat([self.existing_questions, valid_questions_imported])
 
         except Exception as Error:
             self.error = f"There has been an error loading the new questions into the Exam Tester.\nError:{Error}"
 
-        else:
-            result_execution = True
-
         finally:
 
             # Returns as a count the imported questions
-            return len(valid_questions) - 1
+            return len(valid_questions_imported)
+
+    def __return_imported_questions_by_validity(self, validity: int) -> pd.DataFrame:
+        # List where all the valid imported questions are going to get listed
+        valid_questions = [[cab for cab in self.imported_questions.columns]]
+        return self.imported_questions.loc[self.imported_questions["Valid"] == validity][valid_questions]
+
 
     def valid_questions_from_imported_file(self) -> bool:
         return len(self.imported_questions.loc[self.imported_questions["Valid"] == 1]) > 0
