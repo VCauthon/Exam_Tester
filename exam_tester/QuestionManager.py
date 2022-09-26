@@ -133,7 +133,7 @@ class QuestionLoader(QuestionManager):
             return result_execution
 
     # TODO: Add to the MAIN a validation to execute this method if import questions has <1
-    def import_new_questions(self) -> int:
+    def load_valid_imported_questions_to_system(self) -> int:
         """
         Method to import the valid questions into the internal CSV
         """
@@ -144,13 +144,13 @@ class QuestionLoader(QuestionManager):
         try:
 
             # List where all the valid imported questions are going to get listed
-            valid_questions = [[cab for cab in self.data_imported["existing_questions"].columns]]
+            valid_questions = [[cab for cab in self.imported_questions.columns]]
 
-            if self.__check_valid_imported_questions_exist():
+            if self.__check_valid_imported_questions_exist() and self.__check_valid_imported_questions_exist():
 
-                # TODO: You have to iterate only the valid questions
-                # Iterates all the new received questions
-                for index, question_imported in super().imported_questions.iterrows():
+                # Iterates all the valid imported questions
+                for index, question_imported in self.imported_questions.loc[self.imported_questions["Valid"] == 1]\
+                        .iterrows():
 
                     # Adds to the list of valid questions the iterated question
                     data_question = [
