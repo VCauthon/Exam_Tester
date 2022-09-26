@@ -6,7 +6,7 @@
     5. Shows the % of exit from the user
 '''
 
-from exam_tester import data_validator as dv
+from exam_tester import QuestionValidator as dv
 
 # print(dv.data_validator.__subclasses__())
 # print(dv.data_validator.EXISTING_COURSES)
