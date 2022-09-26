@@ -2,8 +2,9 @@ import abc
 from abc import ABC, abstractclassmethod
 import pandas as pd
 from sys import path
+
 path.append("../exam_tester")
-from exam_tester.io import io # noqa E402
+from exam_tester.io import io  # noqa E402
 
 
 class QuestionManager(ABC):
@@ -77,10 +78,10 @@ class QuestionLoader(QuestionManager):
 
                 # Checks if the file has a valid extension
                 if self.io_obj.validate_file_extension(
-                                              path=file_iterated_path,
-                                              ext=".csv") and (
-                                                file == "load_questions" or
-                                                file.lower().startswith("m")):
+                        path=file_iterated_path,
+                        ext=".csv") and (
+                        file == "load_questions" or
+                        file.lower().startswith("m")):
 
                     data_exported = pd.read_csv(file_iterated_path, sep=";")
 
@@ -101,7 +102,6 @@ class QuestionLoader(QuestionManager):
                 # Checks if all the headers are in the imported file
                 if len(list(set(super().data_imported["imported_questions"].columns) -
                             set(self.headers_expected_load_module))) > 0:
-
                     # The process raise an error indicating the erroneous headers
                     showed_data = super().data_imported["imported_questions"].columns
                     raise Exception(
@@ -115,7 +115,6 @@ class QuestionLoader(QuestionManager):
                 # Checks if there are any differences between the headers of the imported CSV vs the expected headers
                 if len(list(set(super().data_imported["existing_questions"].columns) -
                             set(self.headers_expected_load_question))) > 0:
-
                     # The process raise an error indicating the erroneous headers
                     showed_data = super().data_imported["existing_questions"].columns
                     raise Exception(
@@ -232,13 +231,15 @@ class QuestionLoader(QuestionManager):
         return self.valid_questions_from_imported_file()
 
     def __mark_imported_questions_duplicated(self) -> bool:
-
         """
-                # Checks if there are questions duplicated inside the register
-                for index, register in super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Valid"] == 1].iterrow(): # noqa
-                    # Checks if the iterated questions imported exists inside the inner csv with all the questions
-                    super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Question"] == register["Question"], "Valid"] = 0
-                """
+            Marks as invalid all the registers from the imported questions with the same question and module
+        """
+
+        for index, question in self.imported_questions.loc[self.imported_questions["Valid"] == 1].iterrows():
+            # Checks if the iterated register has the same module and question
+            if len(self.existing_questions.query(
+                    f"Module == '{question['Module']}' & Question == '{question['Question']}'")) > 0:
+                self.imported_questions.at[index, 'Value'] = 0
 
         return self.valid_questions_from_imported_file()
 
