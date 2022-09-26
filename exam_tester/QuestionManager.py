@@ -56,6 +56,10 @@ class QuestionLoader(QuestionManager):
                                              "W_Answer", "Source",
                                              "Detail_answer"]
 
+        # Variables where all the questions are going to get saved
+        self.imported_questions = pd.DataFrame
+        self.existing_questions = pd.DataFrame
+
     def initial_execution(self) -> bool:
         """
         Initial execution to load all the imported and existing questions
@@ -82,13 +86,13 @@ class QuestionLoader(QuestionManager):
 
                     # Checks if the file has the new questions to load
                     if file == "load_questions":
-                        super().imported_questions = data_exported
+                        self.imported_questions = data_exported
 
                     # Checks if the file has the modules and is not the history
                     elif file.lower().startswith("m"):
                         super().existing_questions = self.__load_questions_to_class_variable(
                             data_to_load=data_exported,
-                            variable_used=super().data_imported["existing_questions"])
+                            variable_used=self.existing_questions)
 
             # Checks if the imported load_questions file has the proper headers
             if super().data_imported["imported_questions"] is not None and len(
@@ -141,19 +145,18 @@ class QuestionLoader(QuestionManager):
         try:
 
             # List where all the valid imported questions are going to get listed
-            valid_questions = [[cab for cab in super().data_imported["existing_questions"].columns]]
+            valid_questions = [[cab for cab in self.data_imported["existing_questions"].columns]]
 
             if self.__check_valid_imported_questions_exist():
 
                 # TODO: You have to iterate only the valid questions
                 # Iterates all the new received questions
-                for index, question_imported in super().data_imported["imported_questions"].iterrows():
-
+                for index, question_imported in super().imported_questions.iterrows():
 
                     # Adds to the list of valid questions the iterated question
                     data_question = [
                         self.__generate_code_for_question(question_imported["Module"], len(valid_questions) - 1),
-                        [question_imported[header] for header in super().data_imported["imported_questions"].columns]]
+                        [question_imported[header] for header in super().imported_questions.columns]]
 
                     # Drop the imported question from the datatable with all the questions imported
                     super().data_imported["imported_questions"].drop(index=index)
@@ -227,19 +230,24 @@ class QuestionLoader(QuestionManager):
                                super().data_imported["imported_questions"]["Valid"] == 1]) > 0 else False
 
     def __mark_imported_questions_with_invalid_module(self) -> bool:
+        """
+            Marks all the questions from the imported file (load_questions.csv) than has a module (column 1) that
+            doesn't exist in the existing modules from the course selected.
+
+            The existing modules are calculated based in the name of the inner csv file.
+        """
+
 
         # Gets all the modules from the imported questions
-        modules_from_imported_questions = list(super().data_imported["imported_questions"]["Module"].unique())
+        modules_from_imported_questions = list(self.imported_questions["imported_questions"]["Module"].unique())
 
         # Gets all non valid modules
         non_valid_modules = set(modules_from_imported_questions) - set(super().EXISTING_COURSES[self.working_course])
 
         for non_valid_module in non_valid_modules:
-            super().data_imported["imported_questions"].loc[super().data_imported["imported_questions"]["Module"] ==
-                                                            non_valid_module, "Valid"] = 0
+            super().imported_questions.loc[super().imported_questions["Module"] == non_valid_module, "Valid"] = 0
 
-        # TODO: MUST RETURN THE NUMBER OS CASES WHERE THE MODULE IS NOT VALID
-        return len(non_valid_modules) == 0
+        return len(super().imported_questions.loc[super().imported_questions["Valid"] == 1]) > 0
 
     def __generate_code_for_question(self, module: str, questions_inserted: int) -> str:
         """
