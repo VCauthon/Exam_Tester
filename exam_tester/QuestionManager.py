@@ -190,6 +190,9 @@ class QuestionLoader(QuestionManager):
             # Returns as a count the imported questions
             return len(valid_questions) - 1
 
+    def valid_questions_from_imported_file(self) -> bool:
+        return len(self.imported_questions.loc[self.imported_questions["Valid"] == 1]) > 0
+
     # region Validations done before importing any new question to the inner csv files
 
     def __check_valid_imported_questions_exist(self) -> bool:
@@ -207,7 +210,7 @@ class QuestionLoader(QuestionManager):
         if self.__mark_imported_questions_with_invalid_module():
             self.__mark_imported_questions_duplicated()
 
-        return True
+        return self.valid_questions_from_imported_file()
 
     def __mark_imported_questions_with_invalid_module(self) -> bool:
         """
@@ -217,7 +220,6 @@ class QuestionLoader(QuestionManager):
             The existing modules are calculated based in the name of the inner csv file.
         """
 
-
         # Gets all the modules from the imported questions
         modules_from_imported_questions = list(self.imported_questions["imported_questions"]["Module"].unique())
 
@@ -225,9 +227,9 @@ class QuestionLoader(QuestionManager):
         non_valid_modules = set(modules_from_imported_questions) - set(super().EXISTING_COURSES[self.working_course])
 
         for non_valid_module in non_valid_modules:
-            super().imported_questions.loc[super().imported_questions["Module"] == non_valid_module, "Valid"] = 0
+            self.imported_questions.loc[self.imported_questions["Module"] == non_valid_module, "Valid"] = 0
 
-        return len(super().imported_questions.loc[super().imported_questions["Valid"] == 1]) > 0
+        return self.valid_questions_from_imported_file()
 
     def __mark_imported_questions_duplicated(self) -> bool:
 
@@ -238,7 +240,7 @@ class QuestionLoader(QuestionManager):
                     super().data_imported["imported_questions"].loc[ super().data_imported["imported_questions"]["Question"] == register["Question"], "Valid"] = 0
                 """
 
-        return True
+        return self.valid_questions_from_imported_file()
 
     # endregion
 
