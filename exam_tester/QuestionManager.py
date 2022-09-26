@@ -10,8 +10,12 @@ class QuestionManager(ABC):
     """
     Class to validate all the imported and exported before working with it
     """
+
+    imported_questions = pd.DataFrame
+    existing_questions = pd.DataFrame
+
     # Dictionary with all the DataFrames imported
-    data_imported = {
+    data_used = {
         "logs_course": pd.DataFrame,
         "imported_questions": pd.DataFrame,
         # TODO: The imported_questions = 0 variable can be calculate by the own DataFrame (NEW COLUMN) # noqa
@@ -78,11 +82,11 @@ class QuestionLoader(QuestionManager):
 
                     # Checks if the file has the new questions to load
                     if file == "load_questions":
-                        super().data_imported["imported_questions"] = data_exported
+                        super().imported_questions = data_exported
 
                     # Checks if the file has the modules and is not the history
                     elif file.lower().startswith("m"):
-                        super().data_imported["existing_questions"] = self.__load_questions_to_class_variable(
+                        super().existing_questions = self.__load_questions_to_class_variable(
                             data_to_load=data_exported,
                             variable_used=super().data_imported["existing_questions"])
 
@@ -126,32 +130,30 @@ class QuestionLoader(QuestionManager):
             return result_execution
 
     # TODO: Add to the MAIN a validation to execute this method if import questions has <1
-    def import_new_questions(self) -> bool:
+    def import_new_questions(self) -> int:
         """
         Method to import the valid questions into the internal CSV
         """
 
-        # Handle if any error raises
         result_execution = False
+        valid_questions = None
 
         try:
 
             # List where all the valid imported questions are going to get listed
             valid_questions = [[cab for cab in super().data_imported["existing_questions"].columns]]
 
-            # Executes the method to know if there are any valid questions to insert into the inner CSV
-            if self.__check_valid_questions():
+            if self.__check_valid_imported_questions_exist():
 
                 # TODO: You have to iterate only the valid questions
                 # Iterates all the new received questions
                 for index, question_imported in super().data_imported["imported_questions"].iterrows():
 
+
                     # Adds to the list of valid questions the iterated question
                     data_question = [
                         self.__generate_code_for_question(question_imported["Module"], len(valid_questions) - 1),
-                    ]
-                    data_question.append(
-                        [question_imported[header] for header in super().data_imported["imported_questions"].columns])
+                        [question_imported[header] for header in super().data_imported["imported_questions"].columns]]
 
                     # Drop the imported question from the datatable with all the questions imported
                     super().data_imported["imported_questions"].drop(index=index)
@@ -185,26 +187,20 @@ class QuestionLoader(QuestionManager):
             # Returns as a count the imported questions
             return len(valid_questions) - 1
 
-    def __check_valid_questions(self) -> bool:
+    def __check_valid_imported_questions_exist(self) -> bool:
         """
         Method to validate if the new imported questions are valid to enter into the internal CSV
 
         Validations:
-            1. Checks if all the expected fields are informed
-            2. Checks if the imported has a CSV to get saved
-            3. Checks if the question imported already exist in the internal CSV
+            - Checks if the imported has a CSV to get saved
+            - Checks if the question imported already exist in the internal CSV
         """
 
-        # Fields to know if there are any valid questions
+        # Adds a column to mark the valid questions (all starts as valid)
         super().data_imported["imported_questions"]["Valid"] = 1
 
-        # Checks if the expected fields are informed
-        # FIXME: The loc method doesn't know's if the column has data or not
-        """
-        for column in self.headers_expected_load_question:
-            super().data_imported["imported_questions"].loc[
-                super().data_imported["imported_questions"][column] == pd.isnull, "Valid"] = 0
-        """
+        if self.__mark_imported_questions_with_invalid_module():
+            pass
 
         # TODO: Improve the system to knows if the module is valid by m1 to module1 and not forcing that the module informet is the same as the filename
         # Checks if there are questions from non valid modules by looking all the
@@ -229,6 +225,21 @@ class QuestionLoader(QuestionManager):
         # Returns if there are any valid question
         return True if len(super().data_imported["imported_questions"].loc[
                                super().data_imported["imported_questions"]["Valid"] == 1]) > 0 else False
+
+    def __mark_imported_questions_with_invalid_module(self) -> bool:
+
+        # Gets all the modules from the imported questions
+        modules_from_imported_questions = list(super().data_imported["imported_questions"]["Module"].unique())
+
+        # Gets all non valid modules
+        non_valid_modules = set(modules_from_imported_questions) - set(super().EXISTING_COURSES[self.working_course])
+
+        for non_valid_module in non_valid_modules:
+            super().data_imported["imported_questions"].loc[super().data_imported["imported_questions"]["Module"] ==
+                                                            non_valid_module, "Valid"] = 0
+
+        # TODO: MUST RETURN THE NUMBER OS CASES WHERE THE MODULE IS NOT VALID
+        return len(non_valid_modules) == 0
 
     def __generate_code_for_question(self, module: str, questions_inserted: int) -> str:
         """

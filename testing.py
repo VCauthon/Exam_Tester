@@ -1,4 +1,4 @@
-from exam_tester import QuestionValidator as dv
+from exam_tester import QuestionManager as dv
 
 # print(dv.data_validator.__subclasses__())
 # print(dv.data_validator.EXISTING_COURSES)
